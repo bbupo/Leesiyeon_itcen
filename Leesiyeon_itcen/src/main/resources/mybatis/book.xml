@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 매퍼라고 부름 -->
+<mapper namespace="Book" >
+<select id="all" resultType="Book">
+SELECT * FROM book ORDER BY bookid DESC
+</select>
+
+
+<sql id="search" >
+	SELECT * FROM book ORDER BY bookid DESC
+</sql>
+
+
+<select id="total" resultType="Integer">
+SELECT COUNT (*) FROM (<include refid="search"></include>)
+</select>
+
+
+	<select id="list" resultType="Book">
+		SELECT * FROM
+			(SELECT ROWNUM rnum, sub.* FROM
+				(<include refid="search"></include>) sub)
+				<![CDATA[ 
+			WHERE rnum >((#{page}-1)*#{perPage}) AND rnum <= (#{page} * #{perPage})
+			]]>
+	</select>
+
+
+	<insert id="insert">
+		INSERT INTO book
+		VALUES (book_seq.nextval,
+		#{bookname}, #{publisher}, #{price})
+	</insert>
+
+	<update id="update">
+		UPDATE book
+		SET bookname=#{bookname},
+		publisher=#{publisher}, price=#{price}
+		WHERE bookid=#{bookid}
+	</update>
+
+	<delete id="delete">
+		DELETE FROM book
+		WHERE bookid=#{bookid}
+	</delete>
+
+	<select id="item" resultType="Book">
+		SELECT * FROM book
+		WHERE
+		bookid=#{bookid}
+	</select>
+
+</mapper>
