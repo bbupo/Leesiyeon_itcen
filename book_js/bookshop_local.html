@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        
+        
+        <script>
+            var books=[];
+
+
+
+            window.onload = function(){
+                console.log("world");
+            
+                var title = document.getElementById("title");
+                title.textContent="마당서점";
+            
+                books.push({
+
+                    bookid:1,
+                    bookname:"자바",
+                    publisher:"한빛미디어",
+                    price:10000
+
+                });
+
+                 books.push({
+
+                    bookid:2,
+                    bookname:"HTML",
+                    publisher:"한빛미디어",
+                    price:20000
+
+                    });
+
+                 books.push({
+
+                    bookid:3,
+                    bookname:"자바스크립트",
+                    publisher:"한빛미디어",
+                    price:30000
+
+                    });
+
+                    display();
+
+                
+            }
+            function display(){
+
+                if(books.length<1){
+                    html= "<tr><td colspan='5'>등록 된 도서가 없습니다.</td></tr>";
+                }else{
+
+                html = "";
+
+                for(var i=0; i< books.length; i++){
+                    html += "<tr>";
+                            html += "<td>"+books[i].bookid+"</td>";
+                            html += "<td>"+books[i].bookname+"</td>";
+                            html += "<td>"+books[i].publisher+"</td>";
+                            html += "<td>"+books[i].price+"</td>";
+                            html += "<td><button class='btn btn-sm btn-outline-primary' id='submit' onclick='update("+books[i].bookid+")'>변경</button><button class='btn btn-sm btn-outline-danger' onclick='del("+books[i].bookid+")'>삭제</button></td>";
+                    html += "</tr>";
+                 }
+                }
+                var tag =document.getElementById("books");
+                tag.innerHTML =html;
+
+            }
+             console.log("hello");
+
+
+
+
+             function add(){
+                 //alert("등록");
+                 var tag = document.getElementById("modal_add_title");
+                tag.textContent = "도서등록";
+
+                var button = document.getElementById("submit");
+
+                button.onclick=function(){
+
+                    var bookid = document.getElementById("bookid").value;
+                    var bookname =document.getElementById("bookname").value;
+                    var publisher =document.getElementById("publisher").value;
+                    var price = document.getElementById("price").value;
+
+                    books.push({
+                        bookid :parseInt(bookid),
+                        bookname:bookname,
+                        publisher:publisher,
+                        price:parseInt(price) 
+
+                    });
+
+                    $('#modal_add').modal('toggle');
+                    display();
+
+
+            }
+      
+                 $('#modal_add').modal('toggle');
+             }
+
+
+
+
+
+            
+             function update(bookid){
+                //alert("변경"+bookid);
+                var tag = document.getElementById("modal_add_title");
+                tag.textContent = "도서변경";
+
+                var filtered = books.filter(value => value.bookid === bookid);
+
+                    if(books.length<1){
+                        return;
+                    }else{
+                        document.getElementById("bookid").value=parseInt(bookid);
+                        document.getElementById("bookname").value=filtered[0].bookname;
+                        document.getElementById("publisher").value=filtered[0].publisher;
+                        document.getElementById("price").value=parseInt(filtered[0].price);
+
+                    }
+
+
+                var button = document.getElementById("submit");
+
+                button.onclick=function(){
+                var bookid = document.getElementById("bookid").value;
+                    var bookname =document.getElementById("bookname").value;
+                    var publisher =document.getElementById("publisher").value;
+                    var price = document.getElementById("price").value;
+
+                book.forEach(value => { 
+                    if(value.bookid === parseInt(bookid)){
+                        value.bookname = bookname;
+                        value.publisher = publisher;
+                        value.price = parseInt(price);
+                    }
+                    
+                });
+
+
+                    $('#modal_add').modal('toggle');
+                    display();
+
+            }
+            $('#modal_add').modal('toggle');
+        }
+             function del(bookid){
+                alert("삭제"+bookid);
+
+                books = books.filter(function(value, index){
+
+                    if(value.bookid != bookid)
+                        return true;
+                    else
+                        return false;
+                    
+                    
+                });
+
+              //람다형  books =books.filter(value => value.bookid != bookid);
+
+                display();     //호출 화면에 보여줌     
+             }
+
+        
+        </script>
+</head>
+
+<body>
+        <div class="container">
+<h3 id="title">도서목록</h3>
+<table border="1"  class="table table-hover table-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>도서번호</th>
+            <th>도서명</th>
+            <th>출판사</th>
+            <th>가격</th>
+            <th>관리</th>
+        </tr>
+    </thead>
+    <tbody id="books">
+        <tr>
+            <td colspan="5">등록 된 도서가 없습니다.</td>
+        </tr>
+    </tbody>
+</table>
+<div style="text-align:right">
+    <button class="btn btn-sm btn-info" onclick="add()">등록</button>
+</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal_add" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modal_add_title">도서 등록</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div>
+
+                        <div class="form-group">
+                            <label>도서번호:</label>
+                            <input type="number" id="bookid" class="form-control form-control-sm">
+                        </div>
+                            
+                        <div class="form-group">
+                            <label>도서명:</label>
+                            <input type="text" id="bookname" class="form-control form-control-sm">
+                        </div>
+                            
+                        <div class="form-group">
+                            <label>출판사:</label>
+                            <input type="text" id="publisher" class="form-control form-control-sm">
+                        </div>
+                            
+                        <div class="form-group">
+                            <label>가격:</label>
+                            <input type="number" id="price" class="form-control form-control-sm">
+                        </div>
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+              <button type="button" class="btn btn-primary" id="submit">등록</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  </body>
+</html>

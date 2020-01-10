@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        
+        
+        <script>
+          window.onload = function(){
+            
+                var title = document.getElementById("title");
+                title.textContent="마당서점";
+                    display();
+            }
+
+            function ajax(method, url, data, callback){
+                var xhttp = new XMLHttpRequest();
+                xhttp.open(method, url, true); //비동기식 작업
+
+                xhttp.onreadystatechange = function(){
+                    if(xhttp.readyState == XMLHttpRequest.DONE){
+                        if(xhttp.status == 200){
+                            if(xhttp.responseText)
+                            callback(JSON.parse(xhttp.responseText));
+                            else
+                            callback();
+                        }
+                    }
+                };
+
+
+                if(data){
+                    xhttp.setRequestHeader("Content-Type", "application/json");
+                    xhttp.send(JSON.stringify(data));
+                }else
+                xhttp.send();
+            
+            }
+
+            function display(){
+                ajax("GET", "/books", null, (books)=>{
+                    html = "";
+
+                    if(books.length<1){
+                        html= "<tr><td colspan='5'>등록 된 도서가 없습니다.</td></tr>";
+                    }else{
+                        for(var i=0; i< books.length; i++){
+                        html += "<tr>";
+                                html += "<td>"+books[i].bookid+"</td>";
+                                html += "<td>"+books[i].bookname+"</td>";
+                                html += "<td>"+books[i].publisher+"</td>";
+                                html += "<td>"+books[i].price+"</td>";
+                                html += "<td><button class='btn btn-sm btn-outline-primary' onclick='update("+books[i].bookid+")'>변경</button><button class='btn btn-sm btn-outline-danger' onclick='del("+books[i].bookid+")'>삭제</button></td>";
+                        html += "</tr>";
+                        }
+                    }
+                    var tag =document.getElementById("books");
+                    tag.innerHTML =html;
+
+                    
+                });
+            }
+             function add(){
+                 //alert("등록");
+                 var tag = document.getElementById("modal_add_title");
+                tag.textContent = "도서등록";
+                document.bookid = document.getElementById("bookid").value= "";
+                document.bookname = document.getElementById("bookname").value= "";
+                document.publisher = document.getElementById("publisher").value= "";
+                document.price = document.getElementById("price").value= "";
+                document.getElementById("bookid").setAttribute("readonly", "true");
+
+                var button = document.getElementById("submit");
+
+                button.onclick=function(){
+                    console.log("sadasd");
+                    var item ={};
+                    item.bookid = document.getElementById("bookid").value;
+                    item.bookname = document.getElementById("bookname").value;
+                    item.publisher = document.getElementById("publisher").value;
+                    item.price = document.getElementById("price").value;
+
+                    ajax("POST","/books", item, ()=>{
+                        $('#modal_add').modal('toggle');
+                    display();
+                    });
+
+               
+                }
+                 $('#modal_add').modal('toggle');
+             }
+            
+             function update(bookid){
+                //alert("변경"+bookid);
+                var tag = document.getElementById("modal_add_title");
+                tag.textContent = "도서변경";
+                
+                var filtered =ajax("GET", "/books?bookid=" + bookid, null, (filtered)=>{
+                    if(filtered && filtered.length<1){
+                        return;
+                    }else{
+                        document.getElementById("bookid").value=parseInt(bookid);
+                        document.getElementById("bookname").value=filtered[0].bookname;
+                        document.getElementById("publisher").value=filtered[0].publisher;
+                        document.getElementById("price").value=parseInt(filtered[0].price);
+                        document.getElementById("bookid").setAttribute("readonly", "");
+
+                    }
+                    var button = document.getElementById("submit");
+
+                        button.onclick=function(){
+                            var item={};
+                            
+                        item.bookid = document.getElementById("bookid").value;
+                        item.bookname =document.getElementById("bookname").value;
+                        item.publisher =document.getElementById("publisher").value;
+                        item.price = document.getElementById("price").value;
+
+                            ajax("PUT", "/books", item, ()=> {
+                                $('#modal_add').modal('toggle');
+                                display();
+                            });
+                        }
+                        $('#modal_add').modal('toggle');
+                            });    
+                    }
+
+                    
+             function del(bookid){
+                     ajax("DELETE", "/books?bookid="+bookid, null, ()=>{
+                    display();
+                });
+                     
+             }
+
+        
+        </script>
+</head>
+
+<body>
+        <div class="container">
+<h3 id="title">도서목록</h3>
+<table border="1"  class="table table-hover table-sm">
+    <thead class="table-dark">
+        <tr>
+            <th>도서번호</th>
+            <th>도서명</th>
+            <th>출판사</th>
+            <th>가격</th>
+            <th>관리</th>
+        </tr>
+    </thead>
+    <tbody id="books">
+        <tr>
+            <td colspan="5">등록 된 도서가 없습니다.</td>
+        </tr>
+    </tbody>
+</table>
+<div style="text-align:right">
+    <button class="btn btn-sm btn-info" onclick="add()">등록</button>
+</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal_add" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="modal_add_title">도서 등록</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div>
+
+                        <div class="form-group">
+                            <label>도서번호:</label>
+                            <input type="number" id="bookid" class="form-control form-control-sm">
+                        </div>
+                            
+                        <div class="form-group">
+                            <label>도서명:</label>
+                            <input type="text" id="bookname" class="form-control form-control-sm">
+                        </div>
+                            
+                        <div class="form-group">
+                            <label>출판사:</label>
+                            <input type="text" id="publisher" class="form-control form-control-sm">
+                        </div>
+                            
+                        <div class="form-group">
+                            <label>가격:</label>
+                            <input type="number" id="price" class="form-control form-control-sm">
+                        </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+              <button type="button" class="btn btn-primary" id="submit">등록</button>
+            </div>
+          </div>
+        </div>
+      </div>
+  </body>
+</html>
